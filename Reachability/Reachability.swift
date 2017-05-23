@@ -48,7 +48,7 @@ func callback(reachability:SCNetworkReachability, flags: SCNetworkReachabilityFl
     }
 }
 
-public class Reachability {
+public class Reachability: NSObject {
 
     public typealias NetworkReachable = (Reachability) -> ()
     public typealias NetworkUnreachable = (Reachability) -> ()
@@ -105,7 +105,7 @@ public class Reachability {
     
     fileprivate let reachabilitySerialQueue = DispatchQueue(label: "uk.co.ashleymills.reachability")
     
-    required public init(reachabilityRef: SCNetworkReachability) {
+    required public init(reachabilityRef: SCNetworkReachability?) {
         reachableOnWWAN = true
         self.reachabilityRef = reachabilityRef
     }
@@ -117,15 +117,15 @@ public class Reachability {
         self.init(reachabilityRef: ref)
     }
     
-    public convenience init?() {
+    public convenience override init() {
         
         var zeroAddress = sockaddr()
         zeroAddress.sa_len = UInt8(MemoryLayout<sockaddr>.size)
         zeroAddress.sa_family = sa_family_t(AF_INET)
         
-        guard let ref: SCNetworkReachability = withUnsafePointer(to: &zeroAddress, {
+        let ref: SCNetworkReachability? = withUnsafePointer(to: &zeroAddress, {
             SCNetworkReachabilityCreateWithAddress(nil, UnsafePointer($0))
-        }) else { return nil }
+        })
         
         self.init(reachabilityRef: ref)
     }
@@ -210,7 +210,7 @@ public extension Reachability {
         return !isOnWWANFlagSet
     }
     
-    var description: String {
+    override var description: String {
         
         let W = isRunningOnDevice ? (isOnWWANFlagSet ? "W" : "-") : "X"
         let R = isReachableFlagSet ? "R" : "-"
