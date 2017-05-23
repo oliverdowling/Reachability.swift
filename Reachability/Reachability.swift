@@ -117,6 +117,22 @@ public class Reachability: NSObject {
         self.init(reachabilityRef: ref)
     }
     
+    public convenience init?(address: String) {
+        
+        var hostAddress = sockaddr_in()
+        hostAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+        hostAddress.sin_family = sa_family_t(AF_INET)
+        hostAddress.sin_addr.s_addr = inet_addr(address)
+        
+        guard let ref = withUnsafePointer(to: &hostAddress, { unsafeAddress in
+            unsafeAddress.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockAddress in
+                SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, sockAddress)
+            }
+        }) else { return nil }
+        
+        self.init(reachabilityRef: ref)
+    }
+    
     public convenience override init() {
         
         var zeroAddress = sockaddr()
