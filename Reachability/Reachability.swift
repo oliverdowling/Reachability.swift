@@ -242,9 +242,9 @@ public extension Reachability {
     }
 }
 
-fileprivate extension Reachability {
+public extension Reachability {
     
-    func reachabilityChanged() {
+    fileprivate func reachabilityChanged() {
         
         let flags = reachabilityFlags
         
@@ -260,40 +260,44 @@ fileprivate extension Reachability {
     
     var isOnWWANFlagSet: Bool {
         #if os(iOS)
-            return reachabilityFlags.contains(.isWWAN)
+            return previousFlags?.contains(.isWWAN) ?? false
         #else
             return false
         #endif
     }
     var isReachableFlagSet: Bool {
-        return reachabilityFlags.contains(.reachable)
+        return previousFlags?.contains(.reachable) ?? false
     }
     var isConnectionRequiredFlagSet: Bool {
-        return reachabilityFlags.contains(.connectionRequired)
+        return previousFlags?.contains(.connectionRequired) ?? false
     }
     var isInterventionRequiredFlagSet: Bool {
-        return reachabilityFlags.contains(.interventionRequired)
+        return previousFlags?.contains(.interventionRequired) ?? false
     }
     var isConnectionOnTrafficFlagSet: Bool {
-        return reachabilityFlags.contains(.connectionOnTraffic)
+        return previousFlags?.contains(.connectionOnTraffic) ?? false
     }
     var isConnectionOnDemandFlagSet: Bool {
-        return reachabilityFlags.contains(.connectionOnDemand)
+        return previousFlags?.contains(.connectionOnDemand) ?? false
     }
     var isConnectionOnTrafficOrDemandFlagSet: Bool {
-        return !reachabilityFlags.intersection([.connectionOnTraffic, .connectionOnDemand]).isEmpty
+        if let previousFlagsIntersection = previousFlags?.intersection([.connectionOnTraffic, .connectionOnDemand]) {
+            return !previousFlagsIntersection.isEmpty
+        } else { return false }
     }
     var isTransientConnectionFlagSet: Bool {
-        return reachabilityFlags.contains(.transientConnection)
+        return previousFlags?.contains(.transientConnection) ?? false
     }
     var isLocalAddressFlagSet: Bool {
-        return reachabilityFlags.contains(.isLocalAddress)
+        return previousFlags?.contains(.isLocalAddress) ?? false
     }
     var isDirectFlagSet: Bool {
-        return reachabilityFlags.contains(.isDirect)
+        return previousFlags?.contains(.isDirect) ?? false
     }
     var isConnectionRequiredAndTransientFlagSet: Bool {
-        return reachabilityFlags.intersection([.connectionRequired, .transientConnection]) == [.connectionRequired, .transientConnection]
+        if let previousFlagsIntersection = previousFlags?.intersection([.connectionRequired, .transientConnection]), previousFlagsIntersection == [.connectionRequired, .transientConnection] {
+            return true
+        } else { return false }
     }
     
     var reachabilityFlags: SCNetworkReachabilityFlags {
