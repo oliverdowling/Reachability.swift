@@ -250,12 +250,12 @@ public extension Reachability {
         
         guard previousFlags != flags else { return }
         
+        previousFlags = flags
+        
         let block = isReachable ? whenReachable : whenUnreachable
         block?(self)
         
         self.notificationCenter.post(name: ReachabilityChangedNotification, object:self)
-        
-        previousFlags = flags
     }
     
     var isOnWWANFlagSet: Bool {
